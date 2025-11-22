@@ -38,7 +38,7 @@ function parseContent(content: string) {
   if (!content) return []
 
   const parts: Array<{
-    type: 'text' | 'link' | 'callout' | 'code' | 'heading' | 'math-block' | 'math-inline',
+    type: 'text' | 'link' | 'callout' | 'code' | 'heading' | 'math-block' | 'math-inline' | 'bold' | 'italic' | 'artifact',
     value: string,
     calloutType?: string
   }> = []
@@ -128,14 +128,14 @@ function parseContent(content: string) {
   return parts
 }
 
-// Parse a line for both [[links]] and inline $math$
+// Parse a line for [[links]], inline $math$, **bold**, *italic*, and :::artifact:::
 function parseLineWithMathAndLinks(
   line: string,
-  parts: Array<{ type: 'text' | 'link' | 'callout' | 'code' | 'heading' | 'math-block' | 'math-inline', value: string, calloutType?: string }>
+  parts: Array<{ type: 'text' | 'link' | 'callout' | 'code' | 'heading' | 'math-block' | 'math-inline' | 'bold' | 'italic' | 'artifact', value: string, calloutType?: string }>
 ) {
-  // Combined regex for links and inline math
-  // Matches: [[link]] or $math$ (but not $$)
-  const combinedRegex = /\[\[([^\]]+)\]\]|(?<!\$)\$(?!\$)([^$]+)\$(?!\$)/g
+  // Combined regex for links, inline math, bold, italic, and artifact
+  // Matches: [[link]] OR $math$ OR **bold** OR *italic* OR :::artifact{...}:::
+  const combinedRegex = /\[\[([^\]]+)\]\]|(?<!\$)\$(?!\$)([^$]+)\$(?!\$)|(\*\*|__)(.*?)\3|(\*|_)(.*?)\5|:::artifact\{([^}]+)\}:::/g
   let lastIndex = 0
   let match
 
@@ -151,6 +151,15 @@ function parseLineWithMathAndLinks(
     } else if (match[2]) {
       // It's inline $math$
       parts.push({ type: 'math-inline', value: match[2] })
+    } else if (match[4]) {
+      // It's **bold**
+      parts.push({ type: 'bold', value: match[4] })
+    } else if (match[6]) {
+      // It's *italic*
+      parts.push({ type: 'italic', value: match[6] })
+    } else if (match[7]) {
+      // It's an artifact
+      parts.push({ type: 'artifact', value: match[7] })
     }
 
     lastIndex = match.index + match[0].length
@@ -164,78 +173,71 @@ function parseLineWithMathAndLinks(
   }
 }
 
-// Callout component with Kenko styling
+// Callout component
 function Callout({ type, children }: { type: string, children: React.ReactNode }) {
   const config = {
     '&': {
       icon: Lightbulb,
-      bg: '#FFF0E6',
-      border: '#FFE4D1',
-      text: '#CC7E4A',
-      iconColor: '#CC7E4A',
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      text: 'text-amber-800',
+      iconColor: 'text-amber-500',
       label: 'Insight clave'
     },
     '!': {
       icon: AlertCircle,
-      bg: '#CFE4FF',
-      border: '#A3D4FF',
-      text: '#5A8FCC',
-      iconColor: '#5A8FCC',
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-800',
+      iconColor: 'text-blue-500',
       label: 'Importante'
     },
     '!!': {
       icon: AlertCircle,
-      bg: '#FFD9D9',
-      border: '#FFCACA',
-      text: '#D46A6A',
-      iconColor: '#D46A6A',
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-800',
+      iconColor: 'text-red-500',
       label: 'Advertencia'
     },
     '?': {
       icon: HelpCircle,
-      bg: '#E6DAFF',
-      border: '#D6C9F5',
-      text: '#9575CD',
-      iconColor: '#9575CD',
+      bg: 'bg-purple-50',
+      border: 'border-purple-200',
+      text: 'text-purple-800',
+      iconColor: 'text-purple-500',
       label: 'Explorar'
     },
     'Ex:': {
       icon: Code,
-      bg: '#D4F5E9',
-      border: '#A3E4B6',
-      text: '#10B981',
-      iconColor: '#10B981',
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-800',
+      iconColor: 'text-green-500',
       label: 'Ejemplo'
     },
     'Obs:': {
       icon: Eye,
-      bg: '#F6F5F2',
-      border: '#EEEBE6',
-      text: '#6D6D6D',
-      iconColor: '#6D6D6D',
-      label: 'Observacion'
+      bg: 'bg-gray-50',
+      border: 'border-gray-200',
+      text: 'text-gray-800',
+      iconColor: 'text-gray-500',
+      label: 'Observación'
     },
   }[type] || {
     icon: Lightbulb,
-    bg: '#F6F5F2',
-    border: '#EEEBE6',
-    text: '#6D6D6D',
-    iconColor: '#6D6D6D',
+    bg: 'bg-gray-50',
+    border: 'border-gray-200',
+    text: 'text-gray-800',
+    iconColor: 'text-gray-500',
     label: ''
   }
 
   const Icon = config.icon
 
   return (
-    <div
-      className="rounded-2xl p-4 my-3 flex items-start gap-3"
-      style={{
-        backgroundColor: config.bg,
-        border: `2px solid ${config.border}`,
-        color: config.text
-      }}
-    >
-      <Icon className="size-5 mt-0.5 shrink-0" style={{ color: config.iconColor }} />
+    <div className={`${config.bg} ${config.border} ${config.text} border rounded-xl p-4 my-3 flex items-start gap-3`}>
+      <Icon className={`size-5 mt-0.5 ${config.iconColor} shrink-0`} />
       <div>
         {config.label && <span className="font-semibold text-sm">{config.label}: </span>}
         {children}
@@ -244,17 +246,12 @@ function Callout({ type, children }: { type: string, children: React.ReactNode }
   )
 }
 
-// Link component with Kenko styling
+// Link component
 function ConceptLink({ term, onClick }: { term: string, onClick?: (term: string) => void }) {
   return (
     <button
       onClick={() => onClick?.(term)}
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl font-medium text-sm cursor-pointer transition-all hover:scale-[1.02]"
-      style={{
-        backgroundColor: '#E6DAFF',
-        color: '#9575CD',
-        border: '1px solid #D6C9F5'
-      }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors font-medium text-sm cursor-pointer border border-purple-200 hover:border-purple-300"
     >
       <Sparkles className="size-3" />
       {term}
@@ -271,8 +268,8 @@ function MathBlock({ latex, displayMode }: { latex: string, displayMode: boolean
       <div
         className="my-4 py-4 px-6 rounded-2xl overflow-x-auto"
         style={{
-          backgroundColor: '#F6F5F2',
-          border: '2px solid #EEEBE6'
+          backgroundColor: '#F6F8FA',
+          border: '1px solid #E6E6E6'
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -287,11 +284,13 @@ function MathBlock({ latex, displayMode }: { latex: string, displayMode: boolean
   )
 }
 
+import { FileArtifact } from './FileArtifact';
+
 export function NoteRenderer({ content, onLinkClick, isStreaming }: NoteRendererProps) {
   const parsed = useMemo(() => parseContent(content), [content])
 
   return (
-    <div className={`max-w-none ${isStreaming ? 'animate-pulse-subtle' : ''}`} style={{ color: '#222222' }}>
+    <div className={`prose prose-gray max-w-none whitespace-pre-wrap ${isStreaming ? 'animate-pulse-subtle' : ''}`}>
       {parsed.map((part, index) => {
         switch (part.type) {
           case 'link':
@@ -306,18 +305,14 @@ export function NoteRenderer({ content, onLinkClick, isStreaming }: NoteRenderer
 
           case 'heading':
             return (
-              <h2 key={index} className="text-xl font-bold mt-6 mb-3" style={{ color: '#222222' }}>
+              <h2 key={index} className="text-xl font-bold mt-6 mb-3" style={{ color: '#1E1E1E' }}>
                 {part.value}
               </h2>
             )
 
           case 'code':
             return (
-              <pre
-                key={index}
-                className="rounded-2xl p-4 overflow-x-auto my-4 text-sm font-mono"
-                style={{ backgroundColor: '#222222', color: '#F6F5F2' }}
-              >
+              <pre key={index} className="bg-gray-900 text-gray-100 rounded-xl p-4 overflow-x-auto my-4 text-sm">
                 <code>{part.value}</code>
               </pre>
             )
@@ -328,6 +323,18 @@ export function NoteRenderer({ content, onLinkClick, isStreaming }: NoteRenderer
           case 'math-inline':
             return <MathBlock key={index} latex={part.value} displayMode={false} />
 
+          case 'bold':
+            return <strong key={index} className="font-bold">{part.value}</strong>
+
+          case 'italic':
+            return <em key={index} className="italic">{part.value}</em>
+
+          case 'artifact':
+             // Parse attributes from value string (e.g. path="/notes/foo.md")
+             const pathMatch = part.value.match(/path="([^"]+)"/);
+             const path = pathMatch ? pathMatch[1] : '';
+             return path ? <FileArtifact key={index} path={path} onClick={() => onLinkClick?.(path.replace('/notes/', '').replace('.md', ''))} /> : null;
+
           case 'text':
           default:
             return <span key={index}>{part.value}</span>
@@ -335,34 +342,8 @@ export function NoteRenderer({ content, onLinkClick, isStreaming }: NoteRenderer
       })}
 
       {isStreaming && (
-        <span
-          className="inline-block w-2 h-5 ml-1 animate-pulse"
-          style={{ backgroundColor: '#C9B7F3' }}
-        />
+        <span className="inline-block w-2 h-5 bg-purple-500 animate-blink ml-1" />
       )}
-    </div>
-  )
-}
-
-// Streaming indicator component with Kenko styling
-export function StreamingIndicator() {
-  return (
-    <div className="flex items-center gap-2" style={{ color: '#9575CD' }}>
-      <div className="flex gap-1">
-        <span
-          className="w-2 h-2 rounded-full animate-bounce"
-          style={{ backgroundColor: '#C9B7F3', animationDelay: '0ms' }}
-        />
-        <span
-          className="w-2 h-2 rounded-full animate-bounce"
-          style={{ backgroundColor: '#C9B7F3', animationDelay: '150ms' }}
-        />
-        <span
-          className="w-2 h-2 rounded-full animate-bounce"
-          style={{ backgroundColor: '#C9B7F3', animationDelay: '300ms' }}
-        />
-      </div>
-      <span className="text-sm font-medium">Nodi esta pensando...</span>
     </div>
   )
 }
