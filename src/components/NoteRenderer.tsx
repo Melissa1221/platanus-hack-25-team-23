@@ -214,71 +214,57 @@ function parseLineWithMathAndLinks(
   }
 }
 
-// Callout component
+// Callout component with Kenko styling
 function Callout({ type, children }: { type: string, children: React.ReactNode }) {
   const config = {
     '&': {
       icon: Lightbulb,
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      text: 'text-amber-800',
-      iconColor: 'text-amber-500',
+      classes: 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300',
+      iconColor: 'text-orange-600 dark:text-orange-400',
       label: 'Insight clave'
     },
     '!': {
       icon: AlertCircle,
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      text: 'text-blue-800',
-      iconColor: 'text-blue-500',
+      classes: 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
+      iconColor: 'text-blue-600 dark:text-blue-400',
       label: 'Importante'
     },
     '!!': {
       icon: AlertCircle,
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      text: 'text-red-800',
-      iconColor: 'text-red-500',
+      classes: 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
+      iconColor: 'text-red-600 dark:text-red-400',
       label: 'Advertencia'
     },
     '?': {
       icon: HelpCircle,
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-800',
-      iconColor: 'text-purple-500',
+      classes: 'bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-300',
+      iconColor: 'text-purple-600 dark:text-purple-400',
       label: 'Explorar'
     },
     'Ex:': {
       icon: Code,
-      bg: 'bg-green-50',
-      border: 'border-green-200',
-      text: 'text-green-800',
-      iconColor: 'text-green-500',
+      classes: 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
       label: 'Ejemplo'
     },
     'Obs:': {
       icon: Eye,
-      bg: 'bg-gray-50',
-      border: 'border-gray-200',
-      text: 'text-gray-800',
-      iconColor: 'text-gray-500',
-      label: 'Observación'
+      classes: 'bg-zinc-50 border-zinc-200 text-zinc-700 dark:bg-zinc-900/50 dark:border-zinc-800 dark:text-zinc-300',
+      iconColor: 'text-zinc-600 dark:text-zinc-400',
+      label: 'Observacion'
     },
   }[type] || {
     icon: Lightbulb,
-    bg: 'bg-gray-50',
-    border: 'border-gray-200',
-    text: 'text-gray-800',
-    iconColor: 'text-gray-500',
+    classes: 'bg-zinc-50 border-zinc-200 text-zinc-700 dark:bg-zinc-900/50 dark:border-zinc-800 dark:text-zinc-300',
+    iconColor: 'text-zinc-600 dark:text-zinc-400',
     label: ''
   }
 
   const Icon = config.icon
 
   return (
-    <div className={`${config.bg} ${config.border} ${config.text} border rounded-xl p-4 my-3 flex items-start gap-3`}>
-      <Icon className={`size-5 mt-0.5 ${config.iconColor} shrink-0`} />
+    <div className={`rounded-2xl p-4 my-3 flex items-start gap-3 border-2 ${config.classes}`}>
+      <Icon className={`size-5 mt-0.5 shrink-0 ${config.iconColor}`} />
       <div>
         {config.label && <span className="font-semibold text-sm">{config.label}: </span>}
         {children}
@@ -286,6 +272,7 @@ function Callout({ type, children }: { type: string, children: React.ReactNode }
     </div>
   )
 }
+
 
 // Link component
 function ConceptLink({ term, displayText, onClick }: { term: string, displayText?: string, onClick?: (term: string) => void }) {
@@ -310,11 +297,7 @@ function MathBlock({ latex, displayMode }: { latex: string, displayMode: boolean
   if (displayMode) {
     return (
       <div
-        className="my-4 py-4 px-6 rounded-2xl overflow-x-auto"
-        style={{
-          backgroundColor: '#F6F8FA',
-          border: '1px solid #E6E6E6'
-        }}
+        className="my-4 py-4 px-6 rounded-2xl overflow-x-auto bg-[#F6F5F2] border-2 border-[#EEEBE6] dark:bg-zinc-900/50 dark:border-zinc-800"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     )
@@ -382,7 +365,7 @@ export function NoteRenderer({ content, onLinkClick, isStreaming, existingNotes 
   const parsed = useMemo(() => parseContent(content), [content])
 
   return (
-    <div className={`prose prose-gray max-w-none whitespace-pre-wrap ${isStreaming ? 'animate-pulse-subtle' : ''}`}>
+    <div className={`prose prose-gray dark:prose-invert max-w-none whitespace-pre-wrap ${isStreaming ? 'animate-pulse-subtle' : ''}`}>
       {parsed.map((part, index) => {
         switch (part.type) {
           case 'link':
@@ -500,7 +483,10 @@ export function NoteRenderer({ content, onLinkClick, isStreaming, existingNotes 
 
           case 'code':
             return (
-              <pre key={index} className="bg-gray-900 text-gray-100 rounded-xl p-4 overflow-x-auto my-4 text-sm">
+              <pre
+                key={index}
+                className="rounded-2xl p-4 overflow-x-auto my-4 text-sm font-mono bg-[#222222] text-[#F6F5F2] dark:bg-zinc-900 dark:text-zinc-100"
+              >
                 <code>{part.value}</code>
               </pre>
             )
