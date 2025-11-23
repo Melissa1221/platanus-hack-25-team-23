@@ -411,7 +411,7 @@ export async function POST(req: Request) {
     `;
 
     // Initialize Agent
-    let modelName = model || 'gpt-4o';
+    let modelName = model || 'gpt-5.1';
     let apiKey = process.env.OPENAI_API_KEY;
     let configuration = undefined;
 

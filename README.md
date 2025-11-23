@@ -144,7 +144,7 @@ src/
 *   **Lenguaje**: [TypeScript](https://www.typescriptlang.org/)
 *   **Estilos**: [Tailwind CSS 4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/) (Soporte nativo Light/Dark/System)
 *   **Base de Datos**: [Supabase](https://supabase.com/) (PostgreSQL)
-*   **IA**: [OpenAI GPT-4o](https://openai.com/) + [Vercel AI SDK](https://sdk.vercel.ai/docs)
+*   **IA**: [OpenAI GPT-5.1](https://openai.com/) + [Vercel AI SDK](https://sdk.vercel.ai/docs)
 *   **Visualización**: [Cytoscape.js](https://js.cytoscape.org/)
 *   **Integraciones**: Twilio (WhatsApp), Google Calendar API
 
